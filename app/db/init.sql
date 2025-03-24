@@ -16,5 +16,6 @@ CREATE TABLE IF NOT EXISTS weather_requests (
     weather_main VARCHAR(50),
     weather_icon VARCHAR(10),
     temperature FLOAT NOT NULL,
+    weather_data JSON NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

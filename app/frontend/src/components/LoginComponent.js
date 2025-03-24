@@ -7,7 +7,7 @@ const LoginComponent = ({ setToken }) => {
 
   const login = async () => {
     try {
-      const response = await axios.post('http://localhost:3000/login', { username, password });
+      const response = await axios.post('http://localhost:4000/login', { username, password });
       setToken(response.data.token);
     } catch (error) {
       console.error('Error logging in:', error);

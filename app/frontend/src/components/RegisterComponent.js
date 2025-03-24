@@ -8,7 +8,7 @@ const RegisterComponent = () => {
 
   const register = async () => {
     try {
-      const response = await axios.post('http://localhost:3000/register', { username, password, email });
+      const response = await axios.post('http://localhost:4000/register', { username, password, email });
       console.log('User registered:', response.data);
     } catch (error) {
       console.error('Error registering:', error);

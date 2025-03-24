@@ -1,13 +1,23 @@
+require('dotenv').config();
+
+console.log('PG_USER:', process.env.PG_USER);
+console.log('PG_PASSWORD:', process.env.PG_PASSWORD);
+console.log('PG_DATABASE:', process.env.PG_DATABASE);
+console.log('PG_HOST:', process.env.PG_HOST);
+console.log('PG_PORT:', process.env.PG_PORT);
+console.log('JWT_SECRET:', process.env.JWT_SECRET);
+
 const express = require('express');
 const axios = require('axios');
 const { Client } = require('pg');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-require('dotenv').config();
+const cors = require('cors');
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 4000;
 
+app.use(cors());
 app.use(express.json());
 
 // Connect to the database
@@ -19,16 +29,21 @@ const client = new Client({
   port: process.env.PG_PORT,
 });
 
-client.connect();
+client.connect()
+  .then(() => console.log('Connected to the database'))
+  .catch(err => console.error('Database connection error:', err.stack));
 
 // Function to get weather data from OpenWeatherMap API
 async function getWeatherData(city) {
   const apiKey = process.env.WEATHER_API_KEY;
-  const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}`;
+  const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
   const response = await axios.get(url);
-  return response.data;
+  const weatherData = response.data;
+  const temperature = weatherData.main.temp;
+  const weatherMain = weatherData.weather[0].main;
+  const weatherIcon = weatherData.weather[0].icon;
+  return { temperature, weatherMain, weatherIcon, weatherData };
 }
-
 
 // Register user
 app.post('/register', async (req, res) => {
@@ -70,9 +85,9 @@ app.post('/login', async (req, res) => {
 app.get('/weather', async (req, res) => {
   const { city } = req.query;
   try {
-    const weatherData = await getWeatherData(city);
-    const query = 'INSERT INTO weather_requests (city, weather_data, requested_at) VALUES ($1, $2, NOW()) RETURNING *';
-    const values = [city, weatherData];
+    const { temperature, weatherMain, weatherIcon, weatherData } = await getWeatherData(city);
+    const query = 'INSERT INTO weather_requests (city, temperature, weather_main, weather_icon, weather_data, created_at) VALUES ($1, $2, $3, $4, $5, NOW()) RETURNING *';
+    const values = [city, temperature, weatherMain, weatherIcon, weatherData];
     const result = await client.query(query, values);
     res.json(result.rows[0]);
   } catch (err) {
@@ -83,7 +98,7 @@ app.get('/weather', async (req, res) => {
 // Get past weather requests
 app.get('/weather/history', async (req, res) => {
   const { userId } = req.query;
-  const query = 'SELECT * FROM weather_requests WHERE user_id = $1 ORDER BY requested_at DESC';
+  const query = 'SELECT * FROM weather_requests WHERE user_id = $1 ORDER BY created_at DESC';
   const values = [userId];
   try {
     const result = await client.query(query, values);
