@@ -149,7 +149,7 @@ app.post('/login', async (req, res) => {
 
 // Get past weather requests
 app.get('/weather/history', authenticateToken, async (req, res) => {
-  const { userId } = req.query;
+  const userId = req.user.id;
   const query = 'SELECT * FROM weather_requests WHERE user_id = $1 ORDER BY created_at DESC';
   const values = [userId];
   try {
