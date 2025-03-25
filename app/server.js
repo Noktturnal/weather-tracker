@@ -20,6 +20,19 @@ const port = process.env.PORT || 4000;
 app.use(cors());
 app.use(express.json());
 
+// Middleware to authenticate token
+function authenticateToken(req, res, next) {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+  if (token == null) return res.sendStatus(401);
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+    if (err) return res.sendStatus(403);
+    req.user = user;
+    next();
+  });
+}
+
 // Connect to the database
 const client = new Client({
   user: process.env.PG_USER,
@@ -32,6 +45,34 @@ const client = new Client({
 client.connect()
   .then(() => console.log('Connected to the database'))
   .catch(err => console.error('Database connection error:', err.stack));
+
+// Fetch weather data without saving to the database
+app.get('/weather', async (req, res) => {
+  const { city } = req.query;
+  try {
+    const { temperature, tempMin, tempMax, weatherMain, weatherIcon, windSpeed, humidity, sunrise, sunset, timezone, weatherData } = await getWeatherData(city);
+    res.json({ city, temperature, tempMin, tempMax, weatherMain, weatherIcon, windSpeed, humidity, sunrise, sunset, timezone, weatherData });
+  } catch (err) {
+    res.status(400).send(err.message);
+  }
+});
+
+// Save weather request to the database (requires authentication)
+app.post('/weather/save', authenticateToken, async (req, res) => {
+  const { city, temperature, tempMin, tempMax, weatherMain, weatherIcon, windSpeed, humidity, sunrise, sunset, timezone, weatherData } = req.body;
+  const userId = req.user.id;
+  try {
+    const query = `
+      INSERT INTO weather_requests (user_id, city, temperature, temp_min, temp_max, weather_main, weather_icon, wind_speed, humidity, sunrise, sunset, timezone, weather_data, created_at) 
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, NOW()) 
+      RETURNING *`;
+    const values = [userId, city, temperature, tempMin, tempMax, weatherMain, weatherIcon, windSpeed, humidity, sunrise, sunset, timezone, weatherData];
+    const result = await client.query(query, values);
+    res.json(result.rows[0]);
+  } catch (err) {
+    res.status(400).send(err.message);
+  }
+});
 
 // Function to get weather data from OpenWeatherMap API
 async function getWeatherData(city) {
@@ -48,7 +89,8 @@ async function getWeatherData(city) {
   const humidity = weatherData.main.humidity;
   const sunrise = weatherData.sys.sunrise;
   const sunset = weatherData.sys.sunset;
-  return { temperature, tempMin, tempMax, weatherMain, weatherIcon, windSpeed, humidity, sunrise, sunset, weatherData };
+  const timezone = weatherData.timezone;
+  return { temperature, tempMin, tempMax, weatherMain, weatherIcon, windSpeed, humidity, sunrise, sunset, timezone, weatherData };
 }
 
 // Register user
@@ -87,25 +129,8 @@ app.post('/login', async (req, res) => {
   }
 });
 
-// Get weather data
-app.get('/weather', async (req, res) => {
-  const { city } = req.query;
-  try {
-    const { temperature, tempMin, tempMax, weatherMain, weatherIcon, windSpeed, humidity, sunrise, sunset, weatherData } = await getWeatherData(city);
-    const query = `
-      INSERT INTO weather_requests (city, temperature, temp_min, temp_max, weather_main, weather_icon, wind_speed, humidity, sunrise, sunset, weather_data, created_at) 
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW()) 
-      RETURNING *`;
-    const values = [city, temperature, tempMin, tempMax, weatherMain, weatherIcon, windSpeed, humidity, sunrise, sunset, weatherData];
-    const result = await client.query(query, values);
-    res.json(result.rows[0]);
-  } catch (err) {
-    res.status(400).send(err.message);
-  }
-});
-
 // Get past weather requests
-app.get('/weather/history', async (req, res) => {
+app.get('/weather/history', authenticateToken, async (req, res) => {
   const { userId } = req.query;
   const query = 'SELECT * FROM weather_requests WHERE user_id = $1 ORDER BY created_at DESC';
   const values = [userId];
