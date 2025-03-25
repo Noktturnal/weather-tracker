@@ -6,6 +6,7 @@ console.log('PG_DATABASE:', process.env.PG_DATABASE);
 console.log('PG_HOST:', process.env.PG_HOST);
 console.log('PG_PORT:', process.env.PG_PORT);
 console.log('JWT_SECRET:', process.env.JWT_SECRET);
+console.log('WEATHER_API_KEY:', process.env.WEATHER_API_KEY); // Ensure the API key is logged
 
 const express = require('express');
 const axios = require('axios');
@@ -49,10 +50,15 @@ client.connect()
 // Fetch weather data without saving to the database
 app.get('/weather', async (req, res) => {
   const { city } = req.query;
+  console.log('City:', city); // Debugging log
+  if (!city) {
+    return res.status(400).send('City is required');
+  }
   try {
-    const { temperature, tempMin, tempMax, weatherMain, weatherIcon, windSpeed, humidity, sunrise, sunset, timezone, weatherData } = await getWeatherData(city);
-    res.json({ city, temperature, tempMin, tempMax, weatherMain, weatherIcon, windSpeed, humidity, sunrise, sunset, timezone, weatherData });
+    const { temperature, tempMin, tempMax, weatherMain, weatherIcon, windSpeed, humidity, sunrise, sunset, timezone, forecastData, weatherData } = await getWeatherData(city);
+    res.json({ city, temperature, tempMin, tempMax, weatherMain, weatherIcon, windSpeed, humidity, sunrise, sunset, timezone, forecastData, weatherData });
   } catch (err) {
+    console.error('Error fetching weather data:', err); // Debugging log
     res.status(400).send(err.message);
   }
 });
@@ -78,8 +84,19 @@ app.post('/weather/save', authenticateToken, async (req, res) => {
 async function getWeatherData(city) {
   const apiKey = process.env.WEATHER_API_KEY;
   const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
+  console.log('Fetching weather data from:', url); // Debugging log
   const response = await axios.get(url);
   const weatherData = response.data;
+  console.log('Weather data:', weatherData); // Debugging log
+
+  const lat = weatherData.coord.lat;
+  const lon = weatherData.coord.lon;
+  const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
+  console.log('Fetching forecast data from:', forecastUrl); // Debugging log
+  const forecastResponse = await axios.get(forecastUrl);
+  const forecastData = forecastResponse.data.list;
+  console.log('Forecast data:', forecastData); // Debugging log
+
   const temperature = weatherData.main.temp;
   const tempMin = weatherData.main.temp_min;
   const tempMax = weatherData.main.temp_max;
@@ -90,7 +107,8 @@ async function getWeatherData(city) {
   const sunrise = weatherData.sys.sunrise;
   const sunset = weatherData.sys.sunset;
   const timezone = weatherData.timezone;
-  return { temperature, tempMin, tempMax, weatherMain, weatherIcon, windSpeed, humidity, sunrise, sunset, timezone, weatherData };
+
+  return { temperature, tempMin, tempMax, weatherMain, weatherIcon, windSpeed, humidity, sunrise, sunset, timezone, forecastData, weatherData };
 }
 
 // Register user

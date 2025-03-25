@@ -24,6 +24,15 @@ const WeatherComponent = ({ setWeather }) => {
     });
   };
 
+  const formatDate = (timestamp, timezone) => {
+    const date = new Date((timestamp + timezone) * 1000);
+    return date.toLocaleDateString('en-GB', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'short'
+    });
+  };
+
   return (
     <div>
       <h1>Weather App</h1>
@@ -45,6 +54,18 @@ const WeatherComponent = ({ setWeather }) => {
           <p>Humidity: {weather.humidity}%</p>
           <p>Sunrise: {formatTime(weather.sunrise, weather.timezone)}</p>
           <p>Sunset: {formatTime(weather.sunset, weather.timezone)}</p>
+          <h3>5-Day Forecast</h3>
+          <div>
+            {weather.forecastData.map((forecast, index) => (
+              <div key={index}>
+                <p>{formatDate(forecast.dt, weather.timezone)} {formatTime(forecast.dt, weather.timezone)}</p>
+                <p>Temperature: {forecast.main.temp}°C</p>
+                <p>Condition: {forecast.weather[0].main}</p>
+                <p>Wind Speed: {forecast.wind.speed} m/s</p>
+                <p>Humidity: {forecast.main.humidity}%</p>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>
