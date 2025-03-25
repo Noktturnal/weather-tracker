@@ -40,9 +40,15 @@ async function getWeatherData(city) {
   const response = await axios.get(url);
   const weatherData = response.data;
   const temperature = weatherData.main.temp;
+  const tempMin = weatherData.main.temp_min;
+  const tempMax = weatherData.main.temp_max;
   const weatherMain = weatherData.weather[0].main;
   const weatherIcon = weatherData.weather[0].icon;
-  return { temperature, weatherMain, weatherIcon, weatherData };
+  const windSpeed = weatherData.wind.speed;
+  const humidity = weatherData.main.humidity;
+  const sunrise = weatherData.sys.sunrise;
+  const sunset = weatherData.sys.sunset;
+  return { temperature, tempMin, tempMax, weatherMain, weatherIcon, windSpeed, humidity, sunrise, sunset, weatherData };
 }
 
 // Register user
@@ -85,9 +91,12 @@ app.post('/login', async (req, res) => {
 app.get('/weather', async (req, res) => {
   const { city } = req.query;
   try {
-    const { temperature, weatherMain, weatherIcon, weatherData } = await getWeatherData(city);
-    const query = 'INSERT INTO weather_requests (city, temperature, weather_main, weather_icon, weather_data, created_at) VALUES ($1, $2, $3, $4, $5, NOW()) RETURNING *';
-    const values = [city, temperature, weatherMain, weatherIcon, weatherData];
+    const { temperature, tempMin, tempMax, weatherMain, weatherIcon, windSpeed, humidity, sunrise, sunset, weatherData } = await getWeatherData(city);
+    const query = `
+      INSERT INTO weather_requests (city, temperature, temp_min, temp_max, weather_main, weather_icon, wind_speed, humidity, sunrise, sunset, weather_data, created_at) 
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW()) 
+      RETURNING *`;
+    const values = [city, temperature, tempMin, tempMax, weatherMain, weatherIcon, windSpeed, humidity, sunrise, sunset, weatherData];
     const result = await client.query(query, values);
     res.json(result.rows[0]);
   } catch (err) {
