@@ -169,14 +169,25 @@ app.get('/weather/forecast', async (req, res) => {
     // Data pro dnešní den
     const today = new Date().toISOString().split('T')[0];
     const todayData = groupedByDay[today] || [];
-    delete groupedByDay[today]; // Odstraní dnešní den z dalších dnů
+    delete groupedByDay[today];
 
     // Data pro následující dny
     const nextDays = Object.entries(groupedByDay).map(([date, items]) => {
       const maxTemp = Math.max(...items.map((i) => i.main.temp_max));
       const minTemp = Math.min(...items.map((i) => i.main.temp_min));
-      const icon = items.find((i) => i.weather[0].icon).weather[0].icon; // Ikona prvního záznamu dne
-      return { date, maxTemp, minTemp, icon };
+
+      // Najdi nejčastější ikonu pro daný den
+      const iconCounts = items.reduce((acc, i) => {
+        const icon = i.weather[0].icon;
+        acc[icon] = (acc[icon] || 0) + 1;
+        return acc;
+      }, {});
+
+      const mostCommonIcon = Object.keys(iconCounts).reduce((a, b) =>
+        iconCounts[a] > iconCounts[b] ? a : b
+      );
+
+      return { date, maxTemp, minTemp, icon: mostCommonIcon };
     });
 
     res.json({ todayData, nextDays });

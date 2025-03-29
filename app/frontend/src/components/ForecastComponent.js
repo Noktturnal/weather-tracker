@@ -9,7 +9,7 @@ const ForecastComponent = ({ forecast }) => {
           <div key={index} className="forecast-item">
             <p>{new Date(day.date).toLocaleDateString()}</p>
             <img
-              src={`http://openweathermap.org/img/wn/${day.icon}.png`}
+              src={`http://openweathermap.org/img/wn/${day.icon}@2x.png`}
               alt="Weather icon"
             />
             <p>Max: {Math.round(day.maxTemp)}°C</p>

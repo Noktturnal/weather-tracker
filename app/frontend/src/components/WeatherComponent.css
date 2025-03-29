@@ -8,26 +8,31 @@
 }
 
 .weather-header {
-  display:column;
+  position: relative;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column; 
   justify-content: center;
   align-items: center;
   margin-bottom: 20px;
   background-color: rgba(0, 0, 0, 0.5);
   width: 50%;
+  max-width: 400px;
   padding: 20px;
   border-radius: 10px;
-  margin-left: 165px;
+  box-sizing: border-box;
 }
 
 .weather-header input {
-  width: 250px;
-  height: 25px;
-  font-size: 25px;
+  width: 100%;
+  max-width: 350px;
+  height: 40px;
+  font-size: 16px;
   padding: 10px;
   border-radius: 5px;
   border: none;
   text-align: center;
-
+  box-sizing: border-box;
 }
 
 .weather-info {
