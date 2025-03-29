@@ -109,6 +109,11 @@ function App() {
     }
   };
 
+  const handleCurrentLocation = () => {
+    console.log('Fetching weather for current location');
+    // Logic for fetching weather based on current location
+  };
+
   console.log('Token:', token);
 
   return (
@@ -129,6 +134,9 @@ function App() {
           </div>
         )}
       </div>
+      <button className="current-location-btn" onClick={handleCurrentLocation}>
+        My Current Location
+      </button>
       {showLogin && (
         <>
           {console.log('Rendering login form')}

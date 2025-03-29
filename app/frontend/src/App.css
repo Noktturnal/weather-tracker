@@ -1,4 +1,5 @@
 .App {
+  position: relative;
   text-align: center;
   width: 100vw;
   height: 100vh;
@@ -65,5 +66,26 @@
 }
 
 .auth-form button:hover {
+  background-color: #0056b3; /* Tmavší modrá při najetí myší */
+}
+
+.current-location-btn {
+  position: absolute; /* Umístí tlačítko relativně k levému hornímu rohu */
+  margin-top: 10px; /* Vzdálenost od horního okraje */
+  top: 20px; /* Vzdálenost od horního okraje */
+  left: 20px; /* Vzdálenost od levého okraje */
+  padding: 10px 20px; /* Vnitřní odsazení */
+  background-color: #000000; /* Modrá barva tlačítka */
+  color: white; /* Barva textu */
+  border: none; /* Bez okraje */
+  border-radius: 5px; /* Zaoblené rohy */
+  cursor: pointer; /* Změna kurzoru na ukazatel */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Jemný stín */
+  transition: background-color 0.3s ease; /* Plynulý přechod při najetí myší */
+
+}
+
+.auth-buttons button:hover,
+.current-location-btn:hover {
   background-color: #0056b3; /* Tmavší modrá při najetí myší */
 }
