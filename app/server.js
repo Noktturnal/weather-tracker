@@ -1,13 +1,5 @@
 require('dotenv').config();
 
-console.log('PG_USER:', process.env.PG_USER);
-console.log('PG_PASSWORD:', process.env.PG_PASSWORD);
-console.log('PG_DATABASE:', process.env.PG_DATABASE);
-console.log('PG_HOST:', process.env.PG_HOST);
-console.log('PG_PORT:', process.env.PG_PORT);
-console.log('JWT_SECRET:', process.env.JWT_SECRET);
-console.log('WEATHER_API_KEY:', process.env.WEATHER_API_KEY); // Ensure the API key is logged
-
 const express = require('express');
 const axios = require('axios');
 const { Client } = require('pg');
@@ -50,15 +42,14 @@ client.connect()
 // Fetch weather data without saving to the database
 app.get('/weather', async (req, res) => {
   const { city } = req.query;
-  console.log('City:', city); // Debugging log
   if (!city) {
     return res.status(400).send('City is required');
   }
   try {
-    const { temperature, tempMin, tempMax, weatherMain, weatherIcon, windSpeed, humidity, sunrise, sunset, timezone, forecastData, weatherData } = await getWeatherData(city);
-    res.json({ city, temperature, tempMin, tempMax, weatherMain, weatherIcon, windSpeed, humidity, sunrise, sunset, timezone, forecastData, weatherData });
+    const { temperature, tempMin, tempMax, weatherMain, weatherIcon, windSpeed, humidity, sunrise, sunset, timezone, forecastData } = await getWeatherData(city);
+    res.json({ city, temperature, tempMin, tempMax, weatherMain, weatherIcon, windSpeed, humidity, sunrise, sunset, timezone, forecastData });
   } catch (err) {
-    console.error('Error fetching weather data:', err); // Debugging log
+    console.error('Error fetching weather data:', err);
     res.status(400).send(err.message);
   }
 });
@@ -84,18 +75,14 @@ app.post('/weather/save', authenticateToken, async (req, res) => {
 async function getWeatherData(city) {
   const apiKey = process.env.WEATHER_API_KEY;
   const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
-  console.log('Fetching weather data from:', url); // Debugging log
   const response = await axios.get(url);
   const weatherData = response.data;
-  console.log('Weather data:', weatherData); // Debugging log
 
   const lat = weatherData.coord.lat;
   const lon = weatherData.coord.lon;
   const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
-  console.log('Fetching forecast data from:', forecastUrl); // Debugging log
   const forecastResponse = await axios.get(forecastUrl);
   const forecastData = forecastResponse.data.list;
-  console.log('Forecast data:', forecastData); // Debugging log
 
   const temperature = weatherData.main.temp;
   const tempMin = weatherData.main.temp_min;
@@ -108,7 +95,7 @@ async function getWeatherData(city) {
   const sunset = weatherData.sys.sunset;
   const timezone = weatherData.timezone;
 
-  return { temperature, tempMin, tempMax, weatherMain, weatherIcon, windSpeed, humidity, sunrise, sunset, timezone, forecastData, weatherData };
+  return { temperature, tempMin, tempMax, weatherMain, weatherIcon, windSpeed, humidity, sunrise, sunset, timezone, forecastData };
 }
 
 // Register user
@@ -141,7 +128,7 @@ app.post('/login', async (req, res) => {
       return res.status(400).send('Invalid password');
     }
     const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    res.json({ token });
+    res.json({ token, username: user.username });
   } catch (err) {
     res.status(400).send(err.message);
   }
@@ -157,6 +144,45 @@ app.get('/weather/history', authenticateToken, async (req, res) => {
     res.json(result.rows);
   } catch (err) {
     res.status(400).send(err.message);
+  }
+});
+
+app.get('/weather/forecast', async (req, res) => {
+  const { city } = req.query;
+  if (!city) {
+    return res.status(400).send('City is required');
+  }
+
+  try {
+    const { forecastData } = await getWeatherData(city);
+
+    // Skupina dat podle dnů
+    const groupedByDay = {};
+    forecastData.forEach((item) => {
+      const date = new Date(item.dt_txt).toISOString().split('T')[0]; // YYYY-MM-DD
+      if (!groupedByDay[date]) {
+        groupedByDay[date] = [];
+      }
+      groupedByDay[date].push(item);
+    });
+
+    // Data pro dnešní den
+    const today = new Date().toISOString().split('T')[0];
+    const todayData = groupedByDay[today] || [];
+    delete groupedByDay[today]; // Odstraní dnešní den z dalších dnů
+
+    // Data pro následující dny
+    const nextDays = Object.entries(groupedByDay).map(([date, items]) => {
+      const maxTemp = Math.max(...items.map((i) => i.main.temp_max));
+      const minTemp = Math.min(...items.map((i) => i.main.temp_min));
+      const icon = items.find((i) => i.weather[0].icon).weather[0].icon; // Ikona prvního záznamu dne
+      return { date, maxTemp, minTemp, icon };
+    });
+
+    res.json({ todayData, nextDays });
+  } catch (err) {
+    console.error('Error fetching forecast data:', err);
+    res.status(500).send('Error fetching forecast data');
   }
 });
 

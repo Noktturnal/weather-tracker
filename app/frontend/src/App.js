@@ -3,16 +3,18 @@ import './App.css';
 import WeatherComponent from './components/WeatherComponent';
 import LoginComponent from './components/LoginComponent';
 import RegisterComponent from './components/RegisterComponent';
-import SaveWeatherComponent from './components/SaveWeatherComponent';
+import ForecastComponent from './components/ForecastComponent';
 
 function App() {
   const [token, setToken] = useState(localStorage.getItem('token'));
   const [weather, setWeather] = useState(null);
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
-  const [username, setUsername] = useState('');
+  const [username, setUsername] = useState('Guest');
   const [password, setPassword] = useState('');
   const [searchHistory, setSearchHistory] = useState([]);
+  const [forecast, setForecast] = useState(null);
+  const [city, setCity] = useState('');
 
   useEffect(() => {
     if (token) {
@@ -25,30 +27,31 @@ function App() {
   const toggleLogin = () => {
     setShowLogin(!showLogin);
     setShowRegister(false);
-  }
+  };
   const toggleRegister = () => {
     setShowRegister(!showRegister);
     setShowLogin(false);
-  }
+  };
 
   const handleLoginSubmit = async () => {
     try {
       const response = await fetch('http://localhost:4000/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }), // Odesílá přihlašovací údaje
+        body: JSON.stringify({ username, password }),
       });
 
       if (!response.ok) {
         const error = await response.text();
-        alert(error); // Zobrazí chybu, pokud přihlášení selže
+        alert(error);
         return;
       }
 
       const data = await response.json();
-      setToken(data.token); // Uloží token při úspěšném přihlášení
-      setShowLogin(false); // Zavře login formulář
-      console.log('Login successful, token:', data.token);
+      setToken(data.token); // Nastaví token
+      setUsername(data.username); // Nastaví uživatelské jméno
+      setShowLogin(false); // Zavře přihlašovací formulář
+      console.log('Login successful, token:', data.token, 'username:', data.username);
     } catch (err) {
       console.error('Error during login:', err);
       alert('An error occurred during login');
@@ -57,7 +60,7 @@ function App() {
 
   const handleLogout = () => {
     setToken(null);
-    setUsername(''); 
+    setUsername('');
     setWeather(null);
     setShowLogin(false);
     setShowRegister(false);
@@ -70,16 +73,37 @@ function App() {
         method: 'GET',
         headers: { Authorization: `Bearer ${token}` },
       });
-  
+
       if (!response.ok) {
         throw new Error('Failed to fetch search history');
       }
-  
+
       const data = await response.json();
       setSearchHistory(data);
     } catch (err) {
       console.error('Error fetching search history:', err);
       alert('Could not fetch search history');
+    }
+  };
+
+  const fetchForecast = async (city) => {
+    try {
+      const response = await fetch(`http://localhost:4000/weather/forecast?city=${city}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch forecast');
+      }
+      const data = await response.json();
+      setForecast(data);
+    } catch (err) {
+      console.error('Error fetching forecast:', err);
+      alert('Could not fetch forecast');
+    }
+  };
+
+  const handleCitySubmit = (e) => {
+    e.preventDefault();
+    if (city) {
+      fetchForecast(city);
     }
   };
 
@@ -96,7 +120,9 @@ function App() {
           </>
         ) : (
           <div className="user-info">
-            <button onClick={() => alert('Show search history')}>{username}</button>
+            {username && (
+              <button onClick={() => alert('Show search history')}>{username}</button>
+            )}
             <button onClick={handleLogout}>Logout</button>
           </div>
         )}
@@ -128,7 +154,26 @@ function App() {
           <button>Submit</button>
         </div>
       )}
-      {weather && token && <SaveWeatherComponent weather={weather} />}
+      {forecast && (
+        <div className="forecast-container">
+          <h2>5-Day Forecast</h2>
+          <div className="next-days-forecast">
+            <div className="daily-forecast">
+              {forecast.nextDays.map((day, index) => (
+                <div key={index} className="daily-item">
+                  <p>{new Date(day.date).toLocaleDateString()}</p>
+                  <img
+                    src={`http://openweathermap.org/img/wn/${day.icon}.png`}
+                    alt="Weather icon"
+                  />
+                  <p>Max: {Math.round(day.maxTemp)}°C</p>
+                  <p>Min: {Math.round(day.minTemp)}°C</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
