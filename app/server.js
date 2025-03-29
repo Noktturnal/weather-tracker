@@ -128,6 +128,7 @@ app.post('/login', async (req, res) => {
       return res.status(400).send('Invalid password');
     }
     const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    console.log('Login response:', { token, username: user.username });
     res.json({ token, username: user.username });
   } catch (err) {
     res.status(400).send(err.message);

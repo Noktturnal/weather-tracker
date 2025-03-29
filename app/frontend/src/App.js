@@ -25,9 +25,11 @@ function App() {
   }, [token]);
 
   const toggleLogin = () => {
+    console.log('Toggling login form. Current state:', showLogin);
     setShowLogin(!showLogin);
     setShowRegister(false);
   };
+
   const toggleRegister = () => {
     setShowRegister(!showRegister);
     setShowLogin(false);
@@ -48,10 +50,10 @@ function App() {
       }
 
       const data = await response.json();
+      console.log('Login response:', data); // Logování odpovědi
       setToken(data.token); // Nastaví token
       setUsername(data.username); // Nastaví uživatelské jméno
       setShowLogin(false); // Zavře přihlašovací formulář
-      console.log('Login successful, token:', data.token, 'username:', data.username);
     } catch (err) {
       console.error('Error during login:', err);
       alert('An error occurred during login');
@@ -128,22 +130,25 @@ function App() {
         )}
       </div>
       {showLogin && (
-        <div className="auth-form">
-          <h2>Login</h2>
-          <input
-            type="text"
-            placeholder="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <button onClick={handleLoginSubmit}>Submit</button>
-        </div>
+        <>
+          {console.log('Rendering login form')}
+          <div className="auth-form">
+            <h2>Login</h2>
+            <input
+              type="text"
+              placeholder="Username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+            />
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <button onClick={handleLoginSubmit}>Submit</button>
+          </div>
+        </>
       )}
       {showRegister && (
         <div className="auth-form">
