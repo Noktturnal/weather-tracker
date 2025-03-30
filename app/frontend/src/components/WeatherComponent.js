@@ -92,6 +92,8 @@ const WeatherComponent = ({ setWeather, detectedCity }) => {
         return 'url(/images/clear.jpg)';
       case 'Clouds':
         return 'url(/images/clouds.jpg)';
+      case 'Snow': // Přidání podmínky pro sníh
+        return 'url(/images/snow.jpg)';
       default:
         return 'url(/images/default.jpg)';
     }
