@@ -1,70 +1,190 @@
-# Getting Started with Create React App
+# Weather Tracker
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+---
 
-## Available Scripts
+## Project Overview
 
-In the project directory, you can run:
+Weather Tracker is a full-stack web application designed to provide users with real-time weather updates and forecasts. It leverages external APIs for weather and geocoding data and includes features like user authentication and search history management.
 
-### `npm start`
+---
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Features
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- User authentication (register/login/logout)
+- Fetch current weather and 5-day forecast for any city
+- Save weather search history to a database
+- View detailed weather request history
 
-### `npm test`
+---
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## API Documentation
 
-### `npm run build`
+The application uses the following APIs:
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+1. **Weather API**: Provides current weather and 5-day forecasts.
+   - Base URL: `https://api.weatherapi.com`
+   - Required Key: `REACT_APP_WEATHER_API_KEY`
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+2. **Geocoding API**: Converts city names into geographic coordinates.
+   - Base URL: `https://opencagedata.com/`
+   - Required Key: `REACT_APP_GEOCODE_API_KEY`
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+Refer to the respective API documentation for more details on endpoints and usage.
 
-### `npm run eject`
+---
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## Prerequisites
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+Before running the application, ensure you have the following installed:
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+- **Node.js** (v16 or higher)
+- **PostgreSQL** (v12 or higher)
+- **npm** (comes with Node.js)
+- **Git** (optional, for cloning the repository)
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+---
 
-## Learn More
+## Installation and Setup
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### 1. Clone the Repository
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+```bash
+git clone https://github.com/your-repo/weather-tracker.git
+cd weather-tracker
+```
 
-### Code Splitting
+### 2. Install Dependencies
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+Navigate to the `frontend` directory and install the required dependencies:
 
-### Analyzing the Bundle Size
+```bash
+cd app/frontend
+npm install
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+### 3. Configure Environment Variables
 
-### Making a Progressive Web App
+Create a `.env` file in the `app/frontend` directory and add the following variables:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+```env
+REACT_APP_WEATHER_API_KEY=
+REACT_APP_GEOCODE_API_KEY=
+```
 
-### Advanced Configuration
+Create a `.env` file in the `app` directory and add the following variables:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+```env
+PG_USER=
+PG_HOST=
+PG_DATABASE=
+PG_PASSWORD=
+PG_PORT=
+JWT_SECRET=
+WEATHER_API_KEY=
+PORT=
+```
 
-### Deployment
+### 4. Start the Backend Server
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+Navigate to the `app` directory and start the server:
 
-### `npm run build` fails to minify
+```bash
+node server.js
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+The backend server will run on `http://localhost:4000`.
+
+### 5. Start the Frontend Development Server
+
+Go back to the `frontend` directory and run the following command:
+
+```bash
+npm start
+```
+
+The application will be available at `http://localhost:3000`.
+
+---
+
+## Deployment Instructions
+
+To deploy the application to a production environment:
+
+1. Build the frontend:
+   ```bash
+   cd app/frontend
+   npm run build
+   ```
+
+2. Configure the backend server to serve the built frontend files. Update the backend server's configuration to serve static files from the `app/frontend/build` directory.
+
+3. Set up a production database and update the `.env` file with the production database credentials.
+
+4. Use a process manager like `PM2` or a hosting service to run the backend server.
+
+---
+
+## Testing
+
+To run tests for the application, use the following commands:
+
+### Frontend Tests
+
+```bash
+cd app/frontend
+npm test
+```
+
+### Backend Tests
+
+```bash
+cd ../backend
+npm test
+```
+
+---
+
+## Troubleshooting
+
+### Common Issues
+
+1. **API Key Errors**:
+   - Ensure the API keys in the `.env` files are correct and active.
+
+2. **Database Connection Issues**:
+   - Verify the database credentials and ensure the PostgreSQL server is running.
+
+3. **Frontend Not Loading**:
+   - Check the browser console for errors and ensure the frontend server is running on the correct port.
+
+---
+
+## Contributing
+
+Contributions are welcome! Please follow these steps:
+
+1. Fork the repository.
+2. Create a new branch for your feature or bugfix.
+3. Commit your changes and push the branch.
+4. Open a pull request with a detailed description of your changes.
+
+---
+
+## Usage
+
+1. Open the application in your browser at `http://localhost:3000`.
+2. Register for an account or log in if you already have one.
+3. Search for a city to view its current weather and 5-day forecast.
+4. Save your searches to view them later in your history.
+
+---
+
+## License
+
+This project is licensed under the MIT License. See the `LICENSE` file for details.
+
+---
+
+Best regards
+
+Noktturnal the Arcane Magic Wizard or Just a Developer? (Seems the same to me...) 🧙‍♂️💻
