@@ -58,6 +58,7 @@
 .auth-form button {
   width: 100%; /* Šířka tlačítka */
   padding: 10px; /* Vnitřní odsazení */
+  margin-top: 10px; /* Vnější odsazení */
   background-color: #007bff; /* Modrá barva tlačítka */
   color: white; /* Barva textu */
   border: none; /* Bez okraje */
@@ -70,5 +71,23 @@
 }
 
 .auth-buttons button:hover{
+  background-color: #0056b3; /* Tmavší modrá při najetí myší */
+}
+
+.user-info {
+  display: flex;
+  gap: 10px;
+}
+
+.user-info button {
+  padding: 10px 20px;
+  border-radius: 5px;
+  border: none;
+  background-color: #000000;
+  color: #282c34;
+  cursor: pointer;
+}
+
+.user-info button:hover {
   background-color: #0056b3; /* Tmavší modrá při najetí myší */
 }

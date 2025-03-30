@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-const LoginComponent = ({ setToken }) => {
+const LoginComponent = ({ setToken, setShowLogin }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
@@ -11,6 +11,7 @@ const LoginComponent = ({ setToken }) => {
       const token = response.data.token;
       localStorage.setItem('token', token);
       setToken(token);
+      setShowLogin(false); // Zavře přihlašovací okno
     } catch (error) {
       console.error('Error logging in:', error);
     }

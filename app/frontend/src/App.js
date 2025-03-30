@@ -79,10 +79,8 @@ function App() {
       }
 
       const data = await response.json();
-      console.log('Login response:', data); // Logování odpovědi
-      setToken(data.token); // Nastaví token
-      setUsername(data.username); // Nastaví uživatelské jméno
-      setShowLogin(false); // Zavře přihlašovací formulář
+      setToken(data.token);
+      setShowLogin(false); // Zavře přihlašovací okno
     } catch (err) {
       console.error('Error during login:', err);
       alert('An error occurred during login');
@@ -145,10 +143,10 @@ function App() {
 
   return (
     <div className="App">
-      {city ? ( // Zkontroluje, zda je `city` inicializováno
+      {city ? (
         <WeatherComponent setWeather={setWeather} detectedCity={city} />
       ) : (
-        <p>Loading detected city...</p> // Zobrazí zprávu, dokud není `city` k dispozici
+        <p>Loading detected city...</p>
       )}
       <div className="auth-buttons">
         {!token ? (
@@ -158,13 +156,28 @@ function App() {
           </>
         ) : (
           <div className="user-info">
-            {username && (
-              <button onClick={() => alert('Show search history')}>{username}</button>
-            )}
+            <button onClick={() => alert('Show search history')}>Recent requests</button>
             <button onClick={handleLogout}>Logout</button>
           </div>
         )}
       </div>
+
+      {/* Podmíněné vykreslení přihlašovacího okna */}
+      {showLogin && (
+        <div className="auth-form">
+          <LoginComponent setToken={setToken} setShowLogin={setShowLogin} />
+          <button onClick={() => setShowLogin(false)}>Close</button>
+        </div>
+      )}
+
+      {/* Podmíněné vykreslení registračního okna */}
+      {showRegister && (
+        <div className="auth-form">
+          <RegisterComponent setShowRegister={setShowRegister} />
+          <button onClick={() => setShowRegister(false)}>Close</button>
+        </div>
+      )}
+
       {forecast && (
         <div className="forecast-container">
           <h2>5-Day Forecast</h2>

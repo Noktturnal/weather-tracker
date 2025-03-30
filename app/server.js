@@ -123,14 +123,19 @@ app.post('/login', async (req, res) => {
       return res.status(400).send('User not found');
     }
     const user = result.rows[0];
+    console.log('User from DB:', user); // Ladicí výpis
+
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
       return res.status(400).send('Invalid password');
     }
+
     const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    console.log('Login response:', { token, username: user.username });
+    console.log('Generated token:', token); // Ladicí výpis
+    console.log('Returning username:', user.username); // Ladicí výpis
     res.json({ token, username: user.username });
   } catch (err) {
+    console.error('Error in /login:', err); // Ladicí výpis
     res.status(400).send(err.message);
   }
 });

@@ -1,17 +1,23 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-const RegisterComponent = () => {
+const RegisterComponent = ({ setShowRegister }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [email, setEmail] = useState('');
 
   const register = async () => {
     try {
-      const response = await axios.post('http://localhost:4000/register', { username, password, email });
+      const response = await axios.post('http://localhost:4000/register', {
+        username,
+        password,
+        email,
+      });
       console.log('User registered:', response.data);
+      setShowRegister(false); // Zavře registrační okno
     } catch (error) {
       console.error('Error registering:', error);
+      alert(error.response?.data || 'An error occurred during registration');
     }
   };
 
