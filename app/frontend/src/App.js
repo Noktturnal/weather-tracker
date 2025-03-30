@@ -24,6 +24,35 @@ function App() {
     }
   }, [token]);
 
+  useEffect(() => {
+    const fetchUserLocation = async () => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(async (position) => {
+          const { latitude, longitude } = position.coords;
+          try {
+            const response = await fetch(
+              `https://api.openweathermap.org/geo/1.0/reverse?lat=${latitude}&lon=${longitude}&limit=1&appid=${process.env.REACT_APP_WEATHER_API_KEY}`
+            );
+            const data = await response.json();
+            if (data && data.length > 0) {
+              const cityName = data[0].name;
+              setCity(cityName); // Nastaví název města
+              console.log('Detected city:', cityName); // Vypíše název města do logu
+            }
+          } catch (error) {
+            console.error('Error fetching location:', error);
+          }
+        }, (error) => {
+          console.error('Geolocation error:', error);
+        });
+      } else {
+        console.error('Geolocation is not supported by this browser.');
+      }
+    };
+
+    fetchUserLocation();
+  }, []);
+
   const toggleLogin = () => {
     console.log('Toggling login form. Current state:', showLogin);
     setShowLogin(!showLogin);
@@ -95,7 +124,7 @@ function App() {
         throw new Error('Failed to fetch forecast');
       }
       const data = await response.json();
-      setForecast(data);
+      setForecast(data); // Nastaví předpověď počasí
     } catch (err) {
       console.error('Error fetching forecast:', err);
       alert('Could not fetch forecast');
@@ -114,11 +143,9 @@ function App() {
     // Logic for fetching weather based on current location
   };
 
-  console.log('Token:', token);
-
   return (
     <div className="App">
-      <WeatherComponent setWeather={setWeather} />
+      <WeatherComponent setWeather={setWeather} detectedCity={city} />
       <div className="auth-buttons">
         {!token ? (
           <>
@@ -134,36 +161,6 @@ function App() {
           </div>
         )}
       </div>
-      {showLogin && (
-        <>
-          {console.log('Rendering login form')}
-          <div className="auth-form">
-            <h2>Login</h2>
-            <input
-              type="text"
-              placeholder="Username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-            />
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            <button onClick={handleLoginSubmit}>Submit</button>
-          </div>
-        </>
-      )}
-      {showRegister && (
-        <div className="auth-form">
-          <h2>Register</h2>
-          <input type="text" placeholder="Username" />
-          <input type="password" placeholder="Password" />
-          <input type="email" placeholder="Email" />
-          <button>Submit</button>
-        </div>
-      )}
       {forecast && (
         <div className="forecast-container">
           <h2>5-Day Forecast</h2>

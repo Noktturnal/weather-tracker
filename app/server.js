@@ -149,13 +149,13 @@ app.get('/weather/history', authenticateToken, async (req, res) => {
 });
 
 app.get('/weather/forecast', async (req, res) => {
-  const { city } = req.query;
+  const { city } = req.query; // Získá město z dotazu
   if (!city) {
     return res.status(400).send('City is required');
   }
 
   try {
-    const { forecastData } = await getWeatherData(city);
+    const { forecastData } = await getWeatherData(city); // Zavolá funkci getWeatherData s názvem města
 
     // Skupina dat podle dnů
     const groupedByDay = {};

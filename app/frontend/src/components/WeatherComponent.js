@@ -2,8 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import './WeatherComponent.css';
 
-const WeatherComponent = ({ setWeather }) => {
-  const [city, setCity] = useState('Praha');
+const WeatherComponent = ({ setWeather, detectedCity }) => {
+  const [city, setCity] = useState(detectedCity); // Použije detectedCity jako výchozí hodnotu
   const [weather, setWeatherState] = useState(null);
   const [forecast, setForecast] = useState(null);
   const [backgroundImage, setBackgroundImage] = useState('');
