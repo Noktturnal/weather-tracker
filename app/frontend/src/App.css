@@ -92,26 +92,185 @@
   background-color: #0056b3; /* Tmavší modrá při najetí myší */
 }
 
+/* Modal container for search history */
 .history-modal {
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background-color: white;
-  color: black;
+  background: #f9f9f9;
   padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  z-index: 1000;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
   width: 80%;
-  max-width: 500px;
+  max-width: 600px;
+  z-index: 1000;
+  overflow-y: auto;
+  max-height: 80vh;
+}
+
+.history-modal h2 {
+  margin-top: 0;
+  font-size: 1.5rem;
+  color: #333;
+  text-align: center;
 }
 
 .history-modal ul {
   list-style: none;
   padding: 0;
+  margin: 0;
 }
 
-.history-modal li {
+.history-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
   margin-bottom: 10px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  transition: background 0.3s ease;
+}
+
+.history-item:hover {
+  background: #f0f0f0;
+}
+
+.history-item strong {
+  font-weight: bold;
+  color: #555;
+}
+
+.history-item button {
+  padding: 5px 10px;
+  background: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.history-item button:hover {
+  background: #0056b3;
+}
+
+.history-modal button {
+  display: block;
+  margin: 20px auto 0;
+  padding: 10px 20px;
+  background: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.history-modal button:hover {
+  background: #0056b3;
+}
+
+/* Stylování tabulky pro Search History */
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.history-table th,
+.history-table td {
+  padding: 10px;
+  text-align: left;
+  border: 1px solid #ddd;
+}
+
+.history-table th {
+  background-color: #f4f4f4;
+  font-weight: bold;
+  color: #333;
+}
+
+.history-table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.history-table tr:hover {
+  background-color: #f0f0f0;
+}
+
+.history-table button {
+  padding: 5px 10px;
+  background: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.history-table button:hover {
+  background: #0056b3;
+}
+
+/* Modal container for request details */
+.request-details-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  width: 80%;
+  max-width: 600px;
+  z-index: 1000;
+  overflow-y: auto;
+  max-height: 80vh;
+}
+
+.request-details-modal h2 {
+  margin-top: 0;
+  font-size: 1.5rem;
+  color: #333;
+  text-align: center;
+}
+
+.request-details-modal p {
+  margin: 10px 0;
+  font-size: 1rem;
+  color: #555;
+}
+
+.request-details-modal h3 {
+  margin-top: 20px;
+  font-size: 1.2rem;
+  color: #333;
+}
+
+.request-details-modal div {
+  margin-bottom: 10px;
+  padding: 10px;
+  background: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.request-details-modal button {
+  display: block;
+  margin: 20px auto 0;
+  padding: 10px 20px;
+  background: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.request-details-modal button:hover {
+  background: #0056b3;
 }

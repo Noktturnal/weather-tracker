@@ -260,14 +260,28 @@ function App() {
         <div className="history-modal">
           <h2>Search History</h2>
           {searchHistory.length > 0 ? (
-            <ul>
-              {searchHistory.map((request, index) => (
-                <li key={index}>
-                  <strong>City:</strong> {request.city}, <strong>Temperature:</strong> {request.temperature}°C, <strong>Date:</strong> {new Date(request.created_at).toLocaleString()}
-                  <button onClick={() => fetchRequestDetails(request.id)}>View Details</button>
-                </li>
-              ))}
-            </ul>
+            <table className="history-table">
+              <thead>
+                <tr>
+                  <th>City</th>
+                  <th>Temperature</th>
+                  <th>Date</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {searchHistory.map((request, index) => (
+                  <tr key={index} className="history-row">
+                    <td>{request.city}</td>
+                    <td>{request.temperature}°C</td>
+                    <td>{new Date(request.created_at).toLocaleString()}</td>
+                    <td>
+                      <button onClick={() => fetchRequestDetails(request.id)}>View Details</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           ) : (
             <p>No search history found.</p>
           )}
