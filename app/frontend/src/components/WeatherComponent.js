@@ -68,8 +68,8 @@ const WeatherComponent = ({ setWeather, detectedCity }) => {
               <p>Max: {weather.tempMax}°C</p>
               <p>Wind: {weather.windSpeed} m/s</p>
               <p>Humidity: {weather.humidity}%</p>
-              <p>Sunrise: {new Date(weather.sunrise * 1000).toLocaleTimeString()}</p>
-              <p>Sunset: {new Date(weather.sunset * 1000).toLocaleTimeString()}</p>
+              <p>Sunrise: {new Date(weather.sunrise * 1000).toLocaleTimeString('en-GB', { hour12: false })}</p>
+              <p>Sunset: {new Date(weather.sunset * 1000).toLocaleTimeString('en-GB', { hour12: false })}</p>
             </div>
           </div>
         )}
