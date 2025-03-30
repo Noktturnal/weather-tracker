@@ -15,6 +15,7 @@ function App() {
   const [searchHistory, setSearchHistory] = useState([]);
   const [forecast, setForecast] = useState(null);
   const [city, setCity] = useState('');
+  const [showHistory, setShowHistory] = useState(false);
 
   useEffect(() => {
     if (token) {
@@ -64,24 +65,33 @@ function App() {
   };
 
   const handleLoginSubmit = async () => {
+    console.log('Login button clicked'); // Log při kliknutí na tlačítko
+
     try {
+      console.log('Sending login request with:', { username, password }); // Log odesílaných dat
+
       const response = await fetch('http://localhost:4000/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
       });
 
+      console.log('Received response:', response); // Log odpovědi z backendu
+
       if (!response.ok) {
         const error = await response.text();
+        console.error('Login failed with error:', error); // Log chyby z backendu
         alert(error);
         return;
       }
 
       const data = await response.json();
+      console.log('Login successful, received data:', data); // Log úspěšné odpovědi
+
       setToken(data.token);
       setShowLogin(false); // Zavře přihlašovací okno
     } catch (err) {
-      console.error('Error during login:', err);
+      console.error('Error during login:', err); // Log chyby při odesílání požadavku
       alert('An error occurred during login');
     }
   };
@@ -128,6 +138,36 @@ function App() {
     }
   };
 
+  const saveWeatherRequest = async (weatherData) => {
+    try {
+      const token = localStorage.getItem('token'); // Získejte token z localStorage
+      if (!token) {
+        console.error('No token found. User must be logged in to save weather requests.');
+        return;
+      }
+
+      const response = await fetch('http://localhost:4000/weather/save', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(weatherData),
+      });
+
+      if (!response.ok) {
+        const error = await response.text();
+        console.error('Failed to save weather request:', error);
+        return;
+      }
+
+      const data = await response.json();
+      console.log('Weather request saved successfully:', data);
+    } catch (err) {
+      console.error('Error saving weather request:', err);
+    }
+  };
+
   const handleCitySubmit = (e) => {
     e.preventDefault();
     if (city) {
@@ -138,6 +178,13 @@ function App() {
   const handleCurrentLocation = () => {
     console.log('Fetching weather for current location');
     // Logic for fetching weather based on current location
+  };
+
+  const toggleHistory = async () => {
+    if (!showHistory) {
+      await fetchSearchHistory();
+    }
+    setShowHistory(!showHistory);
   };
 
   return (
@@ -155,7 +202,7 @@ function App() {
           </>
         ) : (
           <div className="user-info">
-            <button onClick={() => alert('Show search history')}>Recent requests</button>
+            <button onClick={toggleHistory}>Recent requests</button>
             <button onClick={handleLogout}>Logout</button>
           </div>
         )}
@@ -164,7 +211,20 @@ function App() {
       {/* Podmíněné vykreslení přihlašovacího okna */}
       {showLogin && (
         <div className="auth-form">
-          <LoginComponent setToken={setToken} setShowLogin={setShowLogin} />
+          <h2>Login</h2>
+          <input
+            type="text"
+            placeholder="Username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <button onClick={handleLoginSubmit}>Login</button>
           <button onClick={() => setShowLogin(false)}>Close</button>
         </div>
       )}
@@ -174,6 +234,24 @@ function App() {
         <div className="auth-form">
           <RegisterComponent setShowRegister={setShowRegister} />
           <button onClick={() => setShowRegister(false)}>Close</button>
+        </div>
+      )}
+
+      {showHistory && (
+        <div className="history-modal">
+          <h2>Search History</h2>
+          {searchHistory.length > 0 ? (
+            <ul>
+              {searchHistory.map((request, index) => (
+                <li key={index}>
+                  <strong>City:</strong> {request.city}, <strong>Temperature:</strong> {request.temperature}°C, <strong>Date:</strong> {new Date(request.created_at).toLocaleString()}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>No search history found.</p>
+          )}
+          <button onClick={() => setShowHistory(false)}>Close</button>
         </div>
       )}
 

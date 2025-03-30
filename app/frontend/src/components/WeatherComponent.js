@@ -3,35 +3,86 @@ import axios from 'axios';
 import './WeatherComponent.css';
 
 const WeatherComponent = ({ setWeather, detectedCity }) => {
-  const [city, setCity] = useState(detectedCity); // Použije detectedCity jako výchozí hodnotu
+  const [city, setCity] = useState(detectedCity || ''); // Použije detectedCity jako výchozí hodnotu
   const [weather, setWeatherState] = useState(null);
   const [forecast, setForecast] = useState(null);
   const [backgroundImage, setBackgroundImage] = useState('');
 
-  const getWeather = useCallback(async () => {
+  // Funkce pro uložení požadavku do databáze
+  const saveWeatherRequest = async (weatherData) => {
+    try {
+      const token = localStorage.getItem('token'); // Získejte token z localStorage
+      if (!token) {
+        console.error('No token found. User must be logged in to save weather requests.');
+        return;
+      }
+
+      const response = await fetch('http://localhost:4000/weather/save', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(weatherData),
+      });
+
+      if (!response.ok) {
+        const error = await response.text();
+        console.error('Failed to save weather request:', error);
+        return;
+      }
+
+      const data = await response.json();
+      console.log('Weather request saved successfully:', data);
+    } catch (err) {
+      console.error('Error saving weather request:', err);
+    }
+  };
+
+  const getWeather = useCallback(async (city) => {
     try {
       const response = await axios.get(`http://localhost:4000/weather?city=${city}`);
-      setWeatherState(response.data);
-      setWeather(response.data);
-      setBackgroundImage(getBackgroundImage(response.data.weatherMain));
+      const weatherData = response.data;
+
+      setWeatherState(weatherData);
+      setWeather(weatherData);
+      setBackgroundImage(getBackgroundImage(weatherData.weatherMain));
+
+      // Zavolání saveWeatherRequest pro uložení dat do databáze
+      saveWeatherRequest({
+        city: weatherData.city,
+        temperature: weatherData.temperature,
+        tempMin: weatherData.tempMin,
+        tempMax: weatherData.tempMax,
+        weatherMain: weatherData.weatherMain,
+        weatherIcon: weatherData.weatherIcon,
+        windSpeed: weatherData.windSpeed,
+        humidity: weatherData.humidity,
+        sunrise: weatherData.sunrise,
+        sunset: weatherData.sunset,
+        timezone: weatherData.timezone,
+        weatherData: weatherData,
+      });
     } catch (error) {
       console.error('Error fetching weather data:', error);
     }
-  }, [city, setWeather]);
+  }, [setWeather]);
 
-  const getForecast = useCallback(async () => {
+  const getForecast = useCallback(async (city) => {
     try {
       const response = await axios.get(`http://localhost:4000/weather/forecast?city=${city}`);
       setForecast(response.data.nextDays);
     } catch (error) {
       console.error('Error fetching forecast data:', error);
     }
-  }, [city]);
+  }, []);
 
-  useEffect(() => {
-    getWeather();
-    getForecast();
-  }, [getWeather, getForecast]);
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && city.trim() !== '') {
+      getWeather(city);
+      getForecast(city);
+    }
+  };
 
   const getBackgroundImage = (condition) => {
     switch (condition) {
@@ -55,6 +106,7 @@ const WeatherComponent = ({ setWeather, detectedCity }) => {
             type="text"
             value={city}
             onChange={(e) => setCity(e.target.value)}
+            onKeyDown={handleKeyDown}
             placeholder="Enter city"
           />
         </div>

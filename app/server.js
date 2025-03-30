@@ -17,10 +17,18 @@ app.use(express.json());
 function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
-  if (token == null) return res.sendStatus(401);
+
+  if (!token) {
+    console.log('No token provided');
+    return res.status(401).send('Unauthorized');
+  }
 
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-    if (err) return res.sendStatus(403);
+    if (err) {
+      console.log('Invalid token:', err.message);
+      return res.status(403).send('Forbidden');
+    }
+    console.log('Authenticated user:', user); // Log authenticated user
     req.user = user;
     next();
   });
@@ -36,7 +44,7 @@ const client = new Client({
 });
 
 client.connect()
-  .then(() => console.log('Connected to the database'))
+  .then(() => console.log(`Connected to the database: ${process.env.PG_DATABASE}`))
   .catch(err => console.error('Database connection error:', err.stack));
 
 // Fetch weather data without saving to the database
@@ -58,15 +66,24 @@ app.get('/weather', async (req, res) => {
 app.post('/weather/save', authenticateToken, async (req, res) => {
   const { city, temperature, tempMin, tempMax, weatherMain, weatherIcon, windSpeed, humidity, sunrise, sunset, timezone, weatherData } = req.body;
   const userId = req.user.id;
+
+  console.log('Saving weather request for user:', userId); // Log user ID
+  console.log('Request body:', req.body); // Log request body
+
   try {
     const query = `
       INSERT INTO weather_requests (user_id, city, temperature, temp_min, temp_max, weather_main, weather_icon, wind_speed, humidity, sunrise, sunset, timezone, weather_data, created_at) 
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, NOW()) 
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, NOW()) 
       RETURNING *`;
     const values = [userId, city, temperature, tempMin, tempMax, weatherMain, weatherIcon, windSpeed, humidity, sunrise, sunset, timezone, weatherData];
+
+    console.log('Executing query with values:', values); // Log query values
+
     const result = await client.query(query, values);
+    console.log('Weather request saved:', result.rows[0]); // Log saved record
     res.json(result.rows[0]);
   } catch (err) {
+    console.error('Error saving weather request:', err.message); // Log error
     res.status(400).send(err.message);
   }
 });
@@ -75,27 +92,39 @@ app.post('/weather/save', authenticateToken, async (req, res) => {
 async function getWeatherData(city) {
   const apiKey = process.env.WEATHER_API_KEY;
   const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
-  const response = await axios.get(url);
-  const weatherData = response.data;
+  console.log('Fetching weather data for city:', city); // Log city name
 
-  const lat = weatherData.coord.lat;
-  const lon = weatherData.coord.lon;
-  const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
-  const forecastResponse = await axios.get(forecastUrl);
-  const forecastData = forecastResponse.data.list;
+  try {
+    const response = await axios.get(url);
+    console.log('Weather data response:', response.data); // Log weather data response
 
-  const temperature = weatherData.main.temp;
-  const tempMin = weatherData.main.temp_min;
-  const tempMax = weatherData.main.temp_max;
-  const weatherMain = weatherData.weather[0].main;
-  const weatherIcon = weatherData.weather[0].icon;
-  const windSpeed = weatherData.wind.speed;
-  const humidity = weatherData.main.humidity;
-  const sunrise = weatherData.sys.sunrise;
-  const sunset = weatherData.sys.sunset;
-  const timezone = weatherData.timezone;
+    const lat = response.data.coord.lat;
+    const lon = response.data.coord.lon;
+    const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
+    console.log('Fetching forecast data for lat:', lat, 'lon:', lon); // Log coordinates
 
-  return { temperature, tempMin, tempMax, weatherMain, weatherIcon, windSpeed, humidity, sunrise, sunset, timezone, forecastData };
+    const forecastResponse = await axios.get(forecastUrl);
+    console.log('Forecast data response:', forecastResponse.data); // Log forecast data response
+
+    const weatherData = response.data;
+    const forecastData = forecastResponse.data.list;
+
+    const temperature = weatherData.main.temp;
+    const tempMin = weatherData.main.temp_min;
+    const tempMax = weatherData.main.temp_max;
+    const weatherMain = weatherData.weather[0].main;
+    const weatherIcon = weatherData.weather[0].icon;
+    const windSpeed = weatherData.wind.speed;
+    const humidity = weatherData.main.humidity;
+    const sunrise = weatherData.sys.sunrise;
+    const sunset = weatherData.sys.sunset;
+    const timezone = weatherData.timezone;
+
+    return { temperature, tempMin, tempMax, weatherMain, weatherIcon, windSpeed, humidity, sunrise, sunset, timezone, forecastData };
+  } catch (err) {
+    console.error('Error fetching weather data:', err.message); // Log error
+    throw err;
+  }
 }
 
 // Register user
@@ -115,27 +144,30 @@ app.post('/register', async (req, res) => {
 // Login user
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
+  console.log('Login attempt for username:', username); // Log username
+
   const query = 'SELECT * FROM users WHERE username = $1';
   const values = [username];
   try {
     const result = await client.query(query, values);
     if (result.rows.length === 0) {
+      console.log('User not found:', username); // Log if user not found
       return res.status(400).send('User not found');
     }
     const user = result.rows[0];
-    console.log('User from DB:', user); // Ladicí výpis
+    console.log('User from DB:', user); // Log user data from DB
 
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
+      console.log('Invalid password for username:', username); // Log invalid password
       return res.status(400).send('Invalid password');
     }
 
     const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    console.log('Generated token:', token); // Ladicí výpis
-    console.log('Returning username:', user.username); // Ladicí výpis
+    console.log('Generated token for user:', username); // Log generated token
     res.json({ token, username: user.username });
   } catch (err) {
-    console.error('Error in /login:', err); // Ladicí výpis
+    console.error('Error in /login:', err.message); // Log error
     res.status(400).send(err.message);
   }
 });
@@ -143,12 +175,16 @@ app.post('/login', async (req, res) => {
 // Get past weather requests
 app.get('/weather/history', authenticateToken, async (req, res) => {
   const userId = req.user.id;
+  console.log('Fetching weather history for user:', userId); // Log user ID
+
   const query = 'SELECT * FROM weather_requests WHERE user_id = $1 ORDER BY created_at DESC';
   const values = [userId];
   try {
     const result = await client.query(query, values);
+    console.log('Number of records fetched:', result.rows.length); // Log number of records
     res.json(result.rows);
   } catch (err) {
+    console.error('Error fetching weather history:', err.message); // Log error
     res.status(400).send(err.message);
   }
 });
