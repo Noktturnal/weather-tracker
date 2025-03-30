@@ -33,45 +33,45 @@
 }
 
 .auth-form {
-  position: fixed; /* Umožní umístění formuláře na pevné místo na obrazovce */
-  top: 50%; /* Vertikální zarovnání na střed */
-  left: 50%; /* Horizontální zarovnání na střed */
-  transform: translate(-50%, -50%); /* Posune formulář přesně na střed */
-  background-color: rgba(0, 0, 0, 1); /* Poloprůhledné pozadí */
-  color: white; /* Barva textu */
-  padding: 20px; /* Vnitřní odsazení */
-  border-radius: 10px; /* Zaoblené rohy */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Jemný stín */
-  z-index: 1000; /* Zajistí, že formulář bude nad ostatními prvky */
-  width: 300px; /* Šířka formuláře */
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); 
+  background-color: rgba(0, 0, 0, 1);
+  color: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  width: 300px;
 }
 
 .auth-form input {
-  width: 100%; /* Šířka vstupního pole */
-  padding: 10px; /* Vnitřní odsazení */
-  margin: 10px 0; /* Vnější odsazení */
-  border: 1px solid #ccc; /* Okraj */
-  border-radius: 5px; /* Zaoblené rohy */
-  box-sizing: border-box; /* Zahrnuje padding do šířky */
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
 }
 
 .auth-form button {
-  width: 100%; /* Šířka tlačítka */
-  padding: 10px; /* Vnitřní odsazení */
-  margin-top: 10px; /* Vnější odsazení */
-  background-color: #007bff; /* Modrá barva tlačítka */
-  color: white; /* Barva textu */
-  border: none; /* Bez okraje */
-  border-radius: 5px; /* Zaoblené rohy */
-  cursor: pointer; /* Změna kurzoru na ukazatel */
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
 }
 
 .auth-form button:hover {
-  background-color: #0056b3; /* Tmavší modrá při najetí myší */
+  background-color: #0056b3;
 }
 
 .auth-buttons button:hover{
-  background-color: #0056b3; /* Tmavší modrá při najetí myší */
+  background-color: #0056b3;
 }
 
 .user-info {
@@ -89,10 +89,9 @@
 }
 
 .user-info button:hover {
-  background-color: #0056b3; /* Tmavší modrá při najetí myší */
+  background-color: #0056b3;
 }
 
-/* Modal container for search history */
 .history-modal {
   position: fixed;
   top: 50%;
@@ -173,7 +172,6 @@
   background: #0056b3;
 }
 
-/* Stylování tabulky pro Search History */
 .history-table {
   width: 100%;
   border-collapse: collapse;
@@ -215,7 +213,6 @@
   background: #0056b3;
 }
 
-/* Modal container for request details */
 .request-details-modal {
   position: fixed;
   top: 50%;

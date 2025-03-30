@@ -3,7 +3,7 @@ import axios from 'axios';
 import './WeatherComponent.css';
 
 const WeatherComponent = ({ setWeather, detectedCity }) => {
-  const [city, setCity] = useState(detectedCity || ''); // Použije detectedCity jako výchozí hodnotu
+  const [city, setCity] = useState(detectedCity || '');
   const [weather, setWeatherState] = useState(null);
   const [forecast, setForecast] = useState(null);
   const [backgroundImage, setBackgroundImage] = useState('');
@@ -11,7 +11,7 @@ const WeatherComponent = ({ setWeather, detectedCity }) => {
   // Funkce pro uložení požadavku do databáze
   const saveWeatherRequest = async (weatherData) => {
     try {
-      const token = localStorage.getItem('token'); // Získejte token z localStorage
+      const token = localStorage.getItem('token');
       if (!token) {
         console.error('No token found. User must be logged in to save weather requests.');
         return;
@@ -92,7 +92,7 @@ const WeatherComponent = ({ setWeather, detectedCity }) => {
         return 'url(/images/clear.jpg)';
       case 'Clouds':
         return 'url(/images/clouds.jpg)';
-      case 'Snow': // Přidání podmínky pro sníh
+      case 'Snow':
         return 'url(/images/snow.jpg)';
       default:
         return 'url(/images/default.jpg)';

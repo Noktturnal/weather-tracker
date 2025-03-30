@@ -14,7 +14,7 @@ const RegisterComponent = ({ setShowRegister }) => {
         email,
       });
       console.log('User registered:', response.data);
-      setShowRegister(false); // Zavře registrační okno
+      setShowRegister(false);
     } catch (error) {
       console.error('Error registering:', error);
       alert(error.response?.data || 'An error occurred during registration');

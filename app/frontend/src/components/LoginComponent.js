@@ -11,7 +11,7 @@ const LoginComponent = ({ setToken, setShowLogin }) => {
       const token = response.data.token;
       localStorage.setItem('token', token);
       setToken(token);
-      setShowLogin(false); // Zavře přihlašovací okno
+      setShowLogin(false);
     } catch (error) {
       console.error('Error logging in:', error);
     }

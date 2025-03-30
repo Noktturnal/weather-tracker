@@ -16,7 +16,7 @@ function App() {
   const [forecast, setForecast] = useState(null);
   const [city, setCity] = useState('');
   const [showHistory, setShowHistory] = useState(false);
-  const [selectedRequest, setSelectedRequest] = useState(null); // Stav pro vybraný požadavek
+  const [selectedRequest, setSelectedRequest] = useState(null);
 
   useEffect(() => {
     if (token) {
@@ -38,7 +38,7 @@ function App() {
             const data = await response.json();
             if (data && data.length > 0) {
               const cityName = data[0].name;
-              setCity(cityName); // Nastaví název města
+              setCity(cityName);
             }
           } catch (error) {
             console.error('Error fetching location:', error);
@@ -55,7 +55,6 @@ function App() {
   }, []);
 
   const toggleLogin = () => {
-    console.log('Toggling login form. Current state:', showLogin);
     setShowLogin(!showLogin);
     setShowRegister(false);
   };
@@ -66,33 +65,23 @@ function App() {
   };
 
   const handleLoginSubmit = async () => {
-    console.log('Login button clicked'); // Log při kliknutí na tlačítko
-
     try {
-      console.log('Sending login request with:', { username, password }); // Log odesílaných dat
-
       const response = await fetch('http://localhost:4000/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
       });
 
-      console.log('Received response:', response); // Log odpovědi z backendu
-
       if (!response.ok) {
         const error = await response.text();
-        console.error('Login failed with error:', error); // Log chyby z backendu
         alert(error);
         return;
       }
 
       const data = await response.json();
-      console.log('Login successful, received data:', data); // Log úspěšné odpovědi
-
       setToken(data.token);
-      setShowLogin(false); // Zavře přihlašovací okno
+      setShowLogin(false);
     } catch (err) {
-      console.error('Error during login:', err); // Log chyby při odesílání požadavku
       alert('An error occurred during login');
     }
   };
@@ -120,7 +109,6 @@ function App() {
       const data = await response.json();
       setSearchHistory(data);
     } catch (err) {
-      console.error('Error fetching search history:', err);
       alert('Could not fetch search history');
     }
   };
@@ -132,18 +120,16 @@ function App() {
         throw new Error('Failed to fetch forecast');
       }
       const data = await response.json();
-      setForecast(data); // Nastaví předpověď počasí
+      setForecast(data);
     } catch (err) {
-      console.error('Error fetching forecast:', err);
       alert('Could not fetch forecast');
     }
   };
 
   const saveWeatherRequest = async (weatherData) => {
     try {
-      const token = localStorage.getItem('token'); // Získejte token z localStorage
+      const token = localStorage.getItem('token');
       if (!token) {
-        console.error('No token found. User must be logged in to save weather requests.');
         return;
       }
 
@@ -157,13 +143,10 @@ function App() {
       });
 
       if (!response.ok) {
-        const error = await response.text();
-        console.error('Failed to save weather request:', error);
         return;
       }
 
-      const data = await response.json();
-      console.log('Weather request saved successfully:', data);
+      await response.json();
     } catch (err) {
       console.error('Error saving weather request:', err);
     }
@@ -180,9 +163,8 @@ function App() {
       }
 
       const data = await response.json();
-      setSelectedRequest(data); // Nastaví vybraný požadavek
+      setSelectedRequest(data);
     } catch (err) {
-      console.error('Error fetching request details:', err);
       alert('Could not fetch request details');
     }
   };
@@ -192,11 +174,6 @@ function App() {
     if (city) {
       fetchForecast(city);
     }
-  };
-
-  const handleCurrentLocation = () => {
-    console.log('Fetching weather for current location');
-    // Logic for fetching weather based on current location
   };
 
   const toggleHistory = async () => {
@@ -227,7 +204,6 @@ function App() {
         )}
       </div>
 
-      {/* Podmíněné vykreslení přihlašovacího okna */}
       {showLogin && (
         <div className="auth-form">
           <h2>Login</h2>
@@ -248,7 +224,6 @@ function App() {
         </div>
       )}
 
-      {/* Podmíněné vykreslení registračního okna */}
       {showRegister && (
         <div className="auth-form">
           <RegisterComponent setShowRegister={setShowRegister} />
