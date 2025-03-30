@@ -37,7 +37,6 @@ function App() {
             if (data && data.length > 0) {
               const cityName = data[0].name;
               setCity(cityName); // Nastaví název města
-              console.log('Detected city:', cityName); // Vypíše název města do logu
             }
           } catch (error) {
             console.error('Error fetching location:', error);
