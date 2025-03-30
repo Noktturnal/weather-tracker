@@ -16,6 +16,7 @@ function App() {
   const [forecast, setForecast] = useState(null);
   const [city, setCity] = useState('');
   const [showHistory, setShowHistory] = useState(false);
+  const [selectedRequest, setSelectedRequest] = useState(null); // Stav pro vybraný požadavek
 
   useEffect(() => {
     if (token) {
@@ -168,6 +169,24 @@ function App() {
     }
   };
 
+  const fetchRequestDetails = async (requestId) => {
+    try {
+      const response = await fetch(`http://localhost:4000/weather/request/${requestId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch request details');
+      }
+
+      const data = await response.json();
+      setSelectedRequest(data); // Nastaví vybraný požadavek
+    } catch (err) {
+      console.error('Error fetching request details:', err);
+      alert('Could not fetch request details');
+    }
+  };
+
   const handleCitySubmit = (e) => {
     e.preventDefault();
     if (city) {
@@ -245,6 +264,7 @@ function App() {
               {searchHistory.map((request, index) => (
                 <li key={index}>
                   <strong>City:</strong> {request.city}, <strong>Temperature:</strong> {request.temperature}°C, <strong>Date:</strong> {new Date(request.created_at).toLocaleString()}
+                  <button onClick={() => fetchRequestDetails(request.id)}>View Details</button>
                 </li>
               ))}
             </ul>
@@ -252,6 +272,28 @@ function App() {
             <p>No search history found.</p>
           )}
           <button onClick={() => setShowHistory(false)}>Close</button>
+        </div>
+      )}
+
+      {selectedRequest && (
+        <div className="request-details-modal">
+          <h2>Request Details</h2>
+          <p><strong>City:</strong> {selectedRequest.city}</p>
+          <p><strong>Temperature:</strong> {selectedRequest.temperature}°C</p>
+          <p><strong>Weather:</strong> {selectedRequest.weather_main}</p>
+          <p><strong>Wind Speed:</strong> {selectedRequest.wind_speed} m/s</p>
+          <p><strong>Humidity:</strong> {selectedRequest.humidity}%</p>
+          <p><strong>Sunrise:</strong> {new Date(selectedRequest.sunrise * 1000).toLocaleTimeString()}</p>
+          <p><strong>Sunset:</strong> {new Date(selectedRequest.sunset * 1000).toLocaleTimeString()}</p>
+          <h3>Forecast</h3>
+          {selectedRequest.weather_data.forecastData.map((forecast, index) => (
+            <div key={index}>
+              <p><strong>Date:</strong> {forecast.dt_txt}</p>
+              <p><strong>Temperature:</strong> {forecast.main.temp}°C</p>
+              <p><strong>Weather:</strong> {forecast.weather[0].description}</p>
+            </div>
+          ))}
+          <button onClick={() => setSelectedRequest(null)}>Close</button>
         </div>
       )}
 

@@ -189,6 +189,30 @@ app.get('/weather/history', authenticateToken, async (req, res) => {
   }
 });
 
+// Get details of a specific weather request
+app.get('/weather/request/:id', authenticateToken, async (req, res) => {
+  const requestId = req.params.id;
+  const userId = req.user.id;
+
+  console.log(`Fetching details for request ID: ${requestId}, user ID: ${userId}`); // Log request details
+
+  const query = 'SELECT * FROM weather_requests WHERE id = $1 AND user_id = $2';
+  const values = [requestId, userId];
+
+  try {
+    const result = await client.query(query, values);
+    if (result.rows.length === 0) {
+      return res.status(404).send('Request not found');
+    }
+
+    const request = result.rows[0];
+    res.json(request);
+  } catch (err) {
+    console.error('Error fetching request details:', err.message);
+    res.status(500).send('Error fetching request details');
+  }
+});
+
 app.get('/weather/forecast', async (req, res) => {
   const { city } = req.query; // Získá město z dotazu
   if (!city) {
