@@ -134,9 +134,6 @@ function App() {
           </div>
         )}
       </div>
-      <button className="current-location-btn" onClick={handleCurrentLocation}>
-        My Current Location
-      </button>
       {showLogin && (
         <>
           {console.log('Rendering login form')}
