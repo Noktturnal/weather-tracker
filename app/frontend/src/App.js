@@ -145,7 +145,11 @@ function App() {
 
   return (
     <div className="App">
-      <WeatherComponent setWeather={setWeather} detectedCity={city} />
+      {city ? ( // Zkontroluje, zda je `city` inicializováno
+        <WeatherComponent setWeather={setWeather} detectedCity={city} />
+      ) : (
+        <p>Loading detected city...</p> // Zobrazí zprávu, dokud není `city` k dispozici
+      )}
       <div className="auth-buttons">
         {!token ? (
           <>
