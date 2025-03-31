@@ -37,7 +37,14 @@ function App() {
             );
             const data = await response.json();
             if (data && data.length > 0) {
-              const cityName = data[0].name;
+              let cityName = data[0].name;
+
+              if (cityName.toUpperCase().startsWith('CAPITAL CITY OF ')) {
+                cityName = cityName.substring(16); // Odstraní "Capital City of "
+              }
+
+              cityName = cityName.split(' ').pop();
+
               setCity(cityName);
             }
           } catch (error) {
