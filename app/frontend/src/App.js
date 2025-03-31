@@ -6,6 +6,7 @@ import RegisterComponent from './components/RegisterComponent';
 import ForecastComponent from './components/ForecastComponent';
 
 function App() {
+  // State management
   const [token, setToken] = useState(localStorage.getItem('token'));
   const [weather, setWeather] = useState(null);
   const [showLogin, setShowLogin] = useState(false);
@@ -18,6 +19,7 @@ function App() {
   const [showHistory, setShowHistory] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState(null);
 
+  // Effect: Handle token changes
   useEffect(() => {
     if (token) {
       localStorage.setItem('token', token);
@@ -26,6 +28,7 @@ function App() {
     }
   }, [token]);
 
+  // Effect: Fetch user's location and detect city
   useEffect(() => {
     const fetchUserLocation = async () => {
       if (navigator.geolocation) {
@@ -39,10 +42,12 @@ function App() {
             if (data && data.length > 0) {
               let cityName = data[0].name;
 
+              // Remove "Capital City of " if present
               if (cityName.toUpperCase().startsWith('CAPITAL CITY OF ')) {
-                cityName = cityName.substring(16); // Odstraní "Capital City of "
+                cityName = cityName.substring(16);
               }
 
+              // Extract the last word if the name is multi-word
               cityName = cityName.split(' ').pop();
 
               setCity(cityName);
@@ -61,16 +66,19 @@ function App() {
     fetchUserLocation();
   }, []);
 
+  // Toggle login form visibility
   const toggleLogin = () => {
     setShowLogin(!showLogin);
     setShowRegister(false);
   };
 
+  // Toggle register form visibility
   const toggleRegister = () => {
     setShowRegister(!showRegister);
     setShowLogin(false);
   };
 
+  // Handle login submission
   const handleLoginSubmit = async () => {
     try {
       const response = await fetch('http://localhost:4000/login', {
@@ -93,6 +101,7 @@ function App() {
     }
   };
 
+  // Handle logout
   const handleLogout = () => {
     setToken(null);
     setUsername('');
@@ -102,6 +111,7 @@ function App() {
     localStorage.removeItem('token');
   };
 
+  // Fetch user's search history
   const fetchSearchHistory = async () => {
     try {
       const response = await fetch('http://localhost:4000/weather/history', {
@@ -120,6 +130,7 @@ function App() {
     }
   };
 
+  // Fetch weather forecast for a city
   const fetchForecast = async (city) => {
     try {
       const response = await fetch(`http://localhost:4000/weather/forecast?city=${city}`);
@@ -133,6 +144,7 @@ function App() {
     }
   };
 
+  // Save weather request to the database
   const saveWeatherRequest = async (weatherData) => {
     try {
       const token = localStorage.getItem('token');
@@ -159,6 +171,7 @@ function App() {
     }
   };
 
+  // Fetch details of a specific weather request
   const fetchRequestDetails = async (requestId) => {
     try {
       const response = await fetch(`http://localhost:4000/weather/request/${requestId}`, {
@@ -176,6 +189,7 @@ function App() {
     }
   };
 
+  // Handle city form submission
   const handleCitySubmit = (e) => {
     e.preventDefault();
     if (city) {
@@ -183,6 +197,7 @@ function App() {
     }
   };
 
+  // Toggle search history visibility
   const toggleHistory = async () => {
     if (!showHistory) {
       await fetchSearchHistory();
